@@ -1,0 +1,24 @@
+[project]
+name = "mcp_agent"
+version = "0.1.0"
+description = "UI playground for testing LLMs, agents, and MCPs"
+readme = "README.md"
+requires-python = ">=3.13, <3.14"
+dependencies = [
+    "fastmcp>=2.10.4",
+    "langchain>=0.3.26",
+    "langchain-core>=0.3.68",
+    "langchain-mcp-adapters>=0.1.9",
+    "langchain-openai>=0.3.27",
+    "langgraph>=0.5.2",
+    "langgraph.prebuilt>=0.6.4",
+    "mcp>=1.10.1",
+    "nbformat>=5.10.4",
+    "openai>=1.94.0",
+    "pandas>=2.3.1",
+    "pydantic>=2.11.7",
+    "langchain-anthropic>=0.3.17",
+    "langchain-community>=0.3.27",
+    "python-dotenv>=1.1.1",
+    "fast-agent-mcp>=0.2.58",
+]

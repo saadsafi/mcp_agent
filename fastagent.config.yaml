@@ -1,0 +1,122 @@
+#default_model: gpt-4o-mini
+default_model: openai.gpt-oss.high
+
+# Logging and Console Configuration:
+logger:
+  # Switched off to avoid cluttering the console
+  progress_display: false
+
+  # Show chat User/Assistant messages on the console
+  show_chat: true
+  # Show tool calls on the console
+  show_tools: true
+  # Truncate long tool responses on the console
+  truncate_tools: true
+
+# on windows, adjust the mount point to be the full path e.g. x:/temp/data-analysis/mount-point:/mnt/data/
+mcp:
+  servers:
+
+    prompts:
+      command: prompt-server
+      args: ["./history.txt"]
+      transport: stdio
+
+
+    fetch:
+      command: "uvx"
+      args: ["mcp-server-fetch"]
+      transport: stdio
+
+
+    filesystem:
+      # On windows update the command and arguments to use `node` and the absolute path to the server.
+      # Use `npm i -g @modelcontextprotocol/server-filesystem` to install the server globally.
+      # Use `npm -g root` to find the global node_modules path.`
+      # command: "node"
+      # args: ["c:/Program Files/nodejs/node_modules/@modelcontextprotocol/server-filesystem/dist/index.js","."]
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-filesystem", "./mount-point/"]
+      transport: stdio
+
+
+    #brave:
+      # On windows replace the command and args line to use `node` and the absolute path to the server.
+      # Use `npm i -g @modelcontextprotocol/server-brave-search` to install the server globally.
+      # Use `npm -g root` to find the global node_modules path.`
+      # command: "node"
+      # args: ["c:/Program Files/nodejs/node_modules/@modelcontextprotocol/server-brave-search/dist/index.js"]
+    #  command: "npx"
+    #  args: ["-y", "@modelcontextprotocol/server-brave-search"]
+
+
+    calculator:
+      # something changed and it couldn't find FastMCP, so I had to: uv tool install mcp-server-calculator (which goes into /ssd/uv/tools with its dependencies)
+      command: uvx
+      args: ["mcp-server-calculator"]
+      ## otherwise this needs: uv pip install mcp-server-calculator
+      #command: python
+      #args: ["-m", "mcp_server_calculator"] # notice the underscores
+      transport: stdio
+
+
+    get_time:
+      command: docker
+      args:
+        - run
+        - -i
+        - --rm
+        - mcp/time
+        - --local-timezone=Europe/London
+      transport: stdio
+
+
+    # fast-agent uses http, not streamable_http yet.
+    #transport: streamable_http  # on inspector choose "Sreamable HTTP" and following URL as is
+    # following stoppe working on latest postgres > v16
+    # docker run --init -e DSN='postgresql://postgres:postgres@host.docker.internal:5432/northwind?sslmode=disable' --publish 8008:8080 --name mcp_dbhub bytebase/dbhub:latest --transport http --port 8080 &
+    dbhub-postgres-docker:
+      command: docker
+      args:
+        - run
+        - -i
+        - --rm
+        - bytebase/dbhub
+        - --transport=stdio
+        - --dsn=postgresql://postgres:postgres@host.docker.internal:5432/northwind?sslmode=disable
+      transport: stdio
+        
+        
+    interpreter:
+      command: docker
+      args:
+        - exec
+        - -i
+        - mcp_py_repl
+        - mcp-py-repl
+      transport: stdio
+
+
+    # interpreter:
+      # command: docker
+      # args:
+        # - run
+        # - -i
+        # - --rm
+        # - -v 
+        # - "/d/git/agents/data:/mnt/data/:rw"
+        # - -e PUID=1000
+        # - -e PGID=1000
+        # - --user=root
+        # - --name=mcp_py_repl
+        # - saad/mcp-py-repl
+        ##- ghcr.io/evalstate/mcp-py-repl:latest
+      # transport: stdio
+      
+      # roots:
+        # - uri: "file://./mount-point/"
+          # name: "test_data"
+          # server_uri_alias: "file:///mnt/data/"
+
+    ## docker exec -i mcp_py_repl bash -c "cat /mnt/data/mcp_py_repl.cid" 
+    ## docker exec -i mcp_py_repl mcp-py-repl 
